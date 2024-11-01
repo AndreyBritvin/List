@@ -2,6 +2,7 @@
 #define MY_LIST_H_
 
 #include <stdlib.h>
+#include "utils.h"
 
 typedef int list_val_t;
 
@@ -14,5 +15,8 @@ struct my_list
     size_t      head;
     size_t      tail;
 };
+
+err_code_t list_ctor(my_list *list, size_t size);
+err_code_t list_dtor(my_list *list);
 
 #endif // MY_LIST_H_
