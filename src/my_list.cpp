@@ -68,3 +68,13 @@ err_code_t print_list(my_list list)
 
     return OK;
 }
+
+err_code_t list_insert(my_list list, list_val_t value)
+{
+    return OK;
+}
+
+err_code_t list_remove(my_list list)
+{
+    return OK;
+}
