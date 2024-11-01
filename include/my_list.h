@@ -19,4 +19,7 @@ struct my_list
 err_code_t list_ctor(my_list *list, size_t size);
 err_code_t list_dtor(my_list *list);
 
+err_code_t list_dump(my_list list);
+err_code_t print_list(my_list list);
+
 #endif // MY_LIST_H_
