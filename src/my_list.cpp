@@ -1,4 +1,5 @@
 #include "my_list.h"
+#include <stdio.h>
 
 err_code_t list_ctor(my_list *list, size_t size)
 {
@@ -27,10 +28,43 @@ err_code_t list_dtor(my_list *list)
 
 err_code_t list_dump(my_list list)
 {
+    printf("\nList index =     ");
+    for (size_t i = 0; i < list.size; i++)
+    {
+        printf("%02lu ", i);
+    }
+
+    printf("\nPrinting [data]: ");
+    for (size_t i = 0; i < list.size; i++)
+    {
+        printf("%02d ", list.data[i]);
+    }
+
+    printf("\nPrinting [next]: ");
+    for (size_t i = 0; i < list.size; i++)
+    {
+        printf("%02lu ", list.next[i]);
+    }
+
+    printf("\nPrinting [prev]: ");
+    for (size_t i = 0; i < list.size; i++)
+    {
+        printf("%02lu ", list.prev[i]);
+    }
+
+    printf("\n");
+
     return OK;
 }
 
 err_code_t print_list(my_list list)
 {
+    for (size_t i = 0; i < list.size; i++)
+    {
+        printf("%d ", list.data[list.next[i]]);
+    }
+
+    printf("\n");
+
     return OK;
 }
