@@ -206,22 +206,35 @@ err_code_t make_graph(char *filename, my_list *list)
                                                 i, i, i, i, list->data[i], i, list->next[i], i, list->prev[i]);
     }
 
-    // DOT_("{rank = same; ");
-    // for (size_t i = 0; i < list->size - 1; i++)
-    // {
-    //     DOT_("g%zd; ", i);
-    // }
-    // DOT_("}\n");
+    DOT_("edge[weight=100 color=\"#FFFFFF\"];\n");
+    for (size_t i = 0; i < list->size - 1; i++)
+    {
+        DOT_("g%zd:<i%zd> -> g%zd:<i%zd>;\n", i, i, i + 1, i + 1);
+    }
 
+    DOT_("edge[weight=1 color=\"#FF0000\"];\n");
     for (size_t i = 0; i < list->size - 1; i++)
     {
         if (list->next[i] == -1)
         {
-            DOT_("g%zd:<i%zd> -> g%zd:<i%zd>;\n", i, i, i + 1, i + 1);
+            // DOT_("g%zd:<i%zd> -> g%zd:<i%zd>;\n", i, i, i + 1, i + 1);
         }
         else
         {
             DOT_("g%zd:<n%zd> -> g%zd:<i%zd>;\n", i, i, list->next[i], list->next[i]);
+        }
+    }
+
+    DOT_("edge[weight=1 color=\"#00FF00\"];\n");
+    for (size_t i = 0; i < list->size - 1; i++)
+    {
+        if (list->next[i] == -1)
+        {
+            // DOT_("g%zd:<i%zd> -> g%zd:<i%zd>;\n", i, i, i + 1, i + 1);
+        }
+        else
+        {
+            DOT_("g%zd:<p%zd> -> g%zd:<i%zd>;\n", i, i, list->prev[i], list->prev[i]);
         }
     }
 
