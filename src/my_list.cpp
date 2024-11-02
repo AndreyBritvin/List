@@ -12,7 +12,7 @@ err_code_t list_ctor(my_list *list, size_t size)
 
     for (size_t i = 1; i < size; i++)
     {
-        list->next[i] = FREE_POS;
+        list->prev[i] = list->next[i] = FREE_POS;
     }
     // TODO: handle errors for NULL PTRS
     return OK;
@@ -87,6 +87,7 @@ err_code_t list_insert(my_list *list, size_t pos, list_val_t value)
     {
         list->data[1] = value;
         list->next[1] = 0;
+        list->prev[1] = 0;
         list->head    = 1;
         list->free    = 2;
     }
@@ -94,18 +95,18 @@ err_code_t list_insert(my_list *list, size_t pos, list_val_t value)
     else
     {
         list->free = find_first_free(*list);
-        labels_t buffer        = list->prev[pos - 1]; // TODO - remove -1 via prev array
-        list->prev[pos]        = list->free - 1;
-        printf("\n\nPos = %lu, buffer = %d, free = %d \n", pos, buffer, list->free);
-        list_dump(*list);
         list->data[list->free] = value;
-        list->prev[list->free - 1] = buffer;
 
-        buffer = list->next[pos - 1];
-        list->next[pos - 1] = list->free;
+        labels_t buffer        = list->next[pos - 1];
+        list->next[pos - 1]    = list->free;
         list->next[list->free] = buffer;
 
-        list->free++; // TODO find auto path
+        buffer                 = list->prev[pos - 1]; // TODO - remove -1 via prev array
+        printf("\n\nPos = %lu, buffer = %d, free = %d \n", pos, buffer, list->free);
+        list_dump(*list);
+        // list->prev[pos - 1]    = list->free;
+        list->prev[list->free] = pos - 1;
+        list->prev[list->next[list->free]] = list->free;
     }
 
     return OK;

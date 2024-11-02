@@ -17,6 +17,14 @@ int main()
     print_list(test_list);
     list_dump(test_list);
 
+    list_insert(&test_list, 3, 8);
+    print_list(test_list);
+    list_dump(test_list);
+
+    list_insert(&test_list, 2, 5);
+    print_list(test_list);
+    list_dump(test_list);
+
     list_dtor(&test_list);
 
     return 0;
