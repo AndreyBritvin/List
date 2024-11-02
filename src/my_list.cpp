@@ -1,6 +1,8 @@
 #include "my_list.h"
 #include "utils.h"
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 const int FREE_POS = -1;
 
@@ -79,6 +81,10 @@ err_code_t print_list(my_list list)
 
     printf("\n");
 
+    size_t graph_num = generate_graph(&list) - 1;
+
+    LOG("<img src = img/%d.png>", graph_num);
+
     return OK;
 }
 
@@ -156,4 +162,54 @@ err_code_t disable_logging()
     fclose(LOG_FILE);
 
     return OK;
+}
+
+size_t generate_graph(my_list *list)
+{
+    static size_t graphs_counter = 0;
+
+    char *txt_filename      = "list_dump/txt/%lu.dot";
+    char *base_command      = "dot list_dump/txt/%lu.dot -o list_dump/img/%lu.png -Tpng";
+    char *implementation     = (char *) calloc(strlen(base_command) + 20, sizeof(char));
+    char *txt_full_filename = (char *) calloc(strlen(txt_filename) + 20, sizeof(char));
+
+    sprintf(implementation, "dot list_dump/txt/%lu.dot -o list_dump/img/%lu.png -Tpng", graphs_counter, graphs_counter);
+    sprintf(txt_full_filename, "list_dump/txt/%lu.dot", graphs_counter);
+
+    printf("File to create:  %s\n", txt_full_filename);
+    printf("Command to call: %s\n", implementation);
+    make_graph(txt_full_filename, list);
+    system(implementation);
+
+    free(implementation);
+    free(txt_full_filename);
+
+    graphs_counter++;
+
+    return graphs_counter;
+}
+
+err_code_t make_graph(char *filename, my_list *list)
+{
+#define DOT_(...) fprintf(dot_file, __VA_ARGS__)
+    FILE * SAFE_OPEN_FILE(dot_file, filename, "w");
+
+    DOT_("digraph{\n");
+    DOT_("rankdir = LR\n");
+
+    for (size_t i = 0; i < list->size; i++)
+    {
+        DOT_("g%zd [shape = record, label = \"index = %zd|data = %d |next = %d|prev = %d\"];\n",
+                                                i, i, list->data[i], list->next[i], list->prev[i]);
+    }
+    for (size_t i = 0; i < list->size - 1; i++)
+    {
+        DOT_("g%zd -> g%zd;\n", i, i + 1);
+    }
+
+    DOT_("}\n");
+    fclose(dot_file);
+
+    return OK;
+#undef DOT_
 }

@@ -32,5 +32,7 @@ size_t find_first_free(my_list list);
 err_code_t enable_logging (const char *filename);
 err_code_t disable_logging();
 
+size_t generate_graph(my_list *list);
+err_code_t make_graph(char *filename, my_list *list);
 
 #endif // MY_LIST_H_
