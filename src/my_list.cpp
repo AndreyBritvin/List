@@ -1,7 +1,10 @@
 #include "my_list.h"
+#include "utils.h"
 #include <stdio.h>
 
 const int FREE_POS = -1;
+
+static FILE * LOG_FILE = NULL;
 
 err_code_t list_ctor(my_list *list, size_t size)
 {
@@ -35,31 +38,31 @@ err_code_t list_dtor(my_list *list)
 
 err_code_t list_dump(my_list list)
 {
-    printf("\nList index =     ");
+    LOG("\nList index =     ");
     for (size_t i = 0; i < list.size; i++)
     {
-        printf("%02lu ", i);
+        LOG("%02lu ", i);
     }
 
-    printf("\nPrinting [data]: ");
+    LOG("\nPrinting [data]: ");
     for (size_t i = 0; i < list.size; i++)
     {
-        printf("%02d ", list.data[i]);
+        LOG("%02d ", list.data[i]);
     }
 
-    printf("\nPrinting [next]: ");
+    LOG("\nPrinting [next]: ");
     for (size_t i = 0; i < list.size; i++)
     {
-        printf("%02d ", list.next[i]);
+        LOG("%02d ", list.next[i]);
     }
 
-    printf("\nPrinting [prev]: ");
+    LOG("\nPrinting [prev]: ");
     for (size_t i = 0; i < list.size; i++)
     {
-        printf("%02d ", list.prev[i]);
+        LOG("%02d ", list.prev[i]);
     }
 
-    printf("\n");
+    LOG("\n");
 
     return OK;
 }
@@ -82,6 +85,9 @@ err_code_t print_list(my_list list)
 err_code_t list_insert(my_list *list, size_t pos, list_val_t value)
 {
     pos += 1;
+    LOG("<pre>"
+        "List before insert:\n");
+    list_dump(*list);
 
     if (list->head == 0)
     {
@@ -102,12 +108,16 @@ err_code_t list_insert(my_list *list, size_t pos, list_val_t value)
         list->next[list->free] = buffer;
 
         buffer                 = list->prev[pos - 1]; // TODO - remove -1 via prev array
-        printf("\n\nPos = %lu, buffer = %d, free = %d \n", pos, buffer, list->free);
-        list_dump(*list);
+        // printf("\n\nPos = %lu, buffer = %d, free = %d \n", pos, buffer, list->free);
+        // list_dump(*list);
         // list->prev[pos - 1]    = list->free;
         list->prev[list->free] = pos - 1;
         list->prev[list->next[list->free]] = list->free;
     }
+
+    LOG("List AFTER insert:\n");
+    list_dump(*list);
+    LOG("</pre>");
 
     return OK;
 }
@@ -130,5 +140,20 @@ size_t find_first_free(my_list list)
 
 err_code_t list_remove(my_list list)
 {
+    return OK;
+}
+
+//TODO: MOVE TO ANOTHER FILE
+err_code_t enable_logging(const char *filename)
+{
+    SAFE_OPEN_FILE(LOG_FILE, filename, "w");
+
+    return OK;
+}
+
+err_code_t disable_logging()
+{
+    fclose(LOG_FILE);
+
     return OK;
 }

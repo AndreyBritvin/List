@@ -29,4 +29,8 @@ err_code_t list_remove(my_list list);
 
 size_t find_first_free(my_list list);
 
+err_code_t enable_logging (const char *filename);
+err_code_t disable_logging();
+
+
 #endif // MY_LIST_H_
