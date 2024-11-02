@@ -195,16 +195,34 @@ err_code_t make_graph(char *filename, my_list *list)
     FILE * SAFE_OPEN_FILE(dot_file, filename, "w");
 
     DOT_("digraph{\n");
-    DOT_("rankdir = LR\n");
+    DOT_("rankdir = LR;\n");
 
     for (size_t i = 0; i < list->size; i++)
     {
-        DOT_("g%zd [shape = record, label = \"index = %zd|data = %d |next = %d|prev = %d\"];\n",
-                                                i, i, list->data[i], list->next[i], list->prev[i]);
+        DOT_("g%zd [shape = record, label = \"<i%zd> index = %zd |"
+                                             "<d%zd> data  = %d  |"
+                                             "<n%zd> next  = %d  | "
+                                             "<p%zd> prev  = %d\"];\n",
+                                                i, i, i, i, list->data[i], i, list->next[i], i, list->prev[i]);
     }
+
+    // DOT_("{rank = same; ");
+    // for (size_t i = 0; i < list->size - 1; i++)
+    // {
+    //     DOT_("g%zd; ", i);
+    // }
+    // DOT_("}\n");
+
     for (size_t i = 0; i < list->size - 1; i++)
     {
-        DOT_("g%zd -> g%zd;\n", i, i + 1);
+        if (list->next[i] == -1)
+        {
+            DOT_("g%zd:<i%zd> -> g%zd:<i%zd>;\n", i, i, i + 1, i + 1);
+        }
+        else
+        {
+            DOT_("g%zd:<n%zd> -> g%zd:<i%zd>;\n", i, i, list->next[i], list->next[i]);
+        }
     }
 
     DOT_("}\n");
