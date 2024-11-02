@@ -195,7 +195,7 @@ err_code_t make_graph(char *filename, my_list *list)
     FILE * SAFE_OPEN_FILE(dot_file, filename, "w");
 
     DOT_("digraph{\n");
-    DOT_("rankdir = LR;\n");
+    DOT_("rankdir = LR;\n splines=ortho;\n");
 
     for (size_t i = 0; i < list->size; i++)
     {
@@ -206,35 +206,27 @@ err_code_t make_graph(char *filename, my_list *list)
                                                 i, i, i, i, list->data[i], i, list->next[i], i, list->prev[i]);
     }
 
-    DOT_("edge[weight=100 color=\"#FFFFFF\"];\n");
+    DOT_("edge[weight=100 color=invis];\n");
     for (size_t i = 0; i < list->size - 1; i++)
     {
         DOT_("g%zd:<i%zd> -> g%zd:<i%zd>;\n", i, i, i + 1, i + 1);
     }
 
-    DOT_("edge[weight=1 color=\"#FF0000\"];\n");
+    DOT_("edge[weight=1, color=\"#FF0000\", constraint = false];\n");
     for (size_t i = 0; i < list->size - 1; i++)
     {
-        if (list->next[i] == -1)
+        if (list->next[i] != -1)
         {
-            // DOT_("g%zd:<i%zd> -> g%zd:<i%zd>;\n", i, i, i + 1, i + 1);
-        }
-        else
-        {
-            DOT_("g%zd:<n%zd> -> g%zd:<i%zd>;\n", i, i, list->next[i], list->next[i]);
+            DOT_("g%zd:<p%zd>:s -> g%zd:<p%zd>:s;\n", i, i, list->next[i], list->next[i]);
         }
     }
 
-    DOT_("edge[weight=1 color=\"#00FF00\"];\n");
+    DOT_("edge[weight=1, color=\"#00FF00\", constraint = false];\n");
     for (size_t i = 0; i < list->size - 1; i++)
     {
-        if (list->next[i] == -1)
+        if (list->prev[i] != -1)
         {
-            // DOT_("g%zd:<i%zd> -> g%zd:<i%zd>;\n", i, i, i + 1, i + 1);
-        }
-        else
-        {
-            DOT_("g%zd:<p%zd> -> g%zd:<i%zd>;\n", i, i, list->prev[i], list->prev[i]);
+            DOT_("g%zd:<i%zd>:n -> g%zd:<i%zd>:n;\n", i, i, list->prev[i], list->prev[i]);
         }
     }
 
