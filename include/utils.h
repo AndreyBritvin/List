@@ -20,6 +20,7 @@ enum errors
 {
     OK,
     ERROR_FILE,
+    ERROR_LIST_ALLOCATION_MEMORY,
 };
 
 #endif //UTILS_H_

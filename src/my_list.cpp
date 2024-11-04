@@ -16,6 +16,11 @@ err_code_t list_ctor(my_list *list, size_t size)
     list->next = (labels_t   *) calloc(size, sizeof(labels_t  ));
     list->prev = (labels_t   *) calloc(size, sizeof(labels_t  ));
 
+    if (!(list->data && list->next && list->prev))
+    {
+        return ERROR_LIST_ALLOCATION_MEMORY;
+    }
+
     for (size_t i = 1; i < size; i++)
     {
         list->prev[i] = list->next[i] = FREE_POS;
@@ -23,7 +28,7 @@ err_code_t list_ctor(my_list *list, size_t size)
 
     list->next[0] = 0;
     list->prev[0] = 0;
-    // TODO: handle errors for NULL PTRS
+
     return OK;
 }
 
@@ -125,7 +130,7 @@ err_code_t list_insert(my_list *list, size_t pos, list_val_t value)
         list->prev[list->next[list->free]] = list->free;
     // }
 
-    LOG("List AFTER insert:\n");
+    LOG("\nList AFTER insert:\n");
     list_dump(*list);
     LOG("</pre>");
 
