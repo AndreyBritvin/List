@@ -20,6 +20,9 @@ err_code_t list_ctor(my_list *list, size_t size)
     {
         list->prev[i] = list->next[i] = FREE_POS;
     }
+
+    list->next[0] = 0;
+    list->prev[0] = 0;
     // TODO: handle errors for NULL PTRS
     return OK;
 }
@@ -77,9 +80,9 @@ err_code_t list_dump(my_list list)
 err_code_t print_list(my_list list)
 {
     size_t i = 1;
-    while (list.next[i] != 0)
+    // while (list.next[i] != 0)
     {
-        printf("%d ", list.data[list.next[i]]);
+        // printf("%d ", list.data[list.next[i]]);
 
         i++;
     }
@@ -95,18 +98,18 @@ err_code_t list_insert(my_list *list, size_t pos, list_val_t value)
     LOG("<pre>"
         "List before insert:\n");
     list_dump(*list);
+//
+//     if (list->head == 0)
+//     {
+//         list->data[1] = value;
+//         list->next[1] = 0;
+//         list->prev[1] = 0;
+//         list->head    = 1;
+//         list->free    = 2;
+//     }
 
-    if (list->head == 0)
-    {
-        list->data[1] = value;
-        list->next[1] = 0;
-        list->prev[1] = 0;
-        list->head    = 1;
-        list->free    = 2;
-    }
-
-    else
-    {
+    // else
+    // {
         list->free = find_first_free(*list);
         list->data[list->free] = value;
 
@@ -120,7 +123,7 @@ err_code_t list_insert(my_list *list, size_t pos, list_val_t value)
         // list->prev[pos - 1]    = list->free;
         list->prev[list->free] = pos - 1;
         list->prev[list->next[list->free]] = list->free;
-    }
+    // }
 
     LOG("List AFTER insert:\n");
     list_dump(*list);
@@ -249,12 +252,12 @@ err_code_t make_graph(char *filename, my_list *list)
         }
     }
 
-    DOT_("edge[weight=1, color=\"#FF0000\", minlen = 2];\n");
+    DOT_("edge[weight=1, color=\"#FF0000\"];\n");
     for (size_t i = 0; i < list->size - 1; i++)
     {
         if (list->next[i] != -1)
         {
-            DOT_("g%zd:<p%zd>:e -> g%zd:<i%zd>:w;\n", i, i, list->next[i], list->next[i]);
+            DOT_("g%zd:<p%zd>:s -> g%zd:<p%zd>:s;\n", i, i, list->next[i], list->next[i]);
         }
     }
 
@@ -263,7 +266,7 @@ err_code_t make_graph(char *filename, my_list *list)
     {
         if (list->prev[i] != -1)
         {
-            DOT_("g%zd:<n%zd>:w -> g%zd:<i%zd>:e;\n", i, i, list->prev[i], list->prev[i]);
+            DOT_("g%zd:<i%zd>:n -> g%zd:<i%zd>:n;\n", i, i, list->prev[i], list->prev[i]);
         }
     }
 
