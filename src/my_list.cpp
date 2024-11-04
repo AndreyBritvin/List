@@ -4,7 +4,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-const int FREE_POS = -1;
+const int  FREE_POS = -1;
+const int EMPTY_POS =  0;
 
 static FILE * LOG_FILE = NULL;
 
@@ -27,8 +28,8 @@ err_code_t list_dtor(my_list *list)
 {
     for (size_t i = 0; i < list->size; i++)
     {
-        list->data[i] = 0;
-        list->next[i] = list->prev[i] = 0;
+        list->data[i] = EMPTY_POS;
+        list->next[i] = list->prev[i] = EMPTY_POS;
     }
 
     free(list->data); list->data = NULL;
@@ -66,6 +67,10 @@ err_code_t list_dump(my_list list)
 
     LOG("\n");
 
+    size_t graph_num = generate_graph(&list) - 1;
+
+    LOG("<img src = img/%d.png>", graph_num);
+
     return OK;
 }
 
@@ -80,10 +85,6 @@ err_code_t print_list(my_list list)
     }
 
     printf("\n");
-
-    size_t graph_num = generate_graph(&list) - 1;
-
-    LOG("<img src = img/%d.png>", graph_num);
 
     return OK;
 }
@@ -109,11 +110,11 @@ err_code_t list_insert(my_list *list, size_t pos, list_val_t value)
         list->free = find_first_free(*list);
         list->data[list->free] = value;
 
-        labels_t buffer        = list->next[pos - 1];
+        // labels_t buffer        = list->next[pos - 1];
+        list->next[list->free] = list->next[pos - 1];
         list->next[pos - 1]    = list->free;
-        list->next[list->free] = buffer;
 
-        buffer                 = list->prev[pos - 1]; // TODO - remove -1 via prev array
+        // buffer                 = list->prev[pos - 1]; // TODO - remove -1 via prev array
         // printf("\n\nPos = %lu, buffer = %d, free = %d \n", pos, buffer, list->free);
         // list_dump(*list);
         // list->prev[pos - 1]    = list->free;
@@ -141,11 +142,26 @@ size_t find_first_free(my_list list)
         }
     }
 
+
     return first_free_pos;
 }
 
-err_code_t list_remove(my_list list)
+err_code_t list_remove(my_list *list, size_t pos)
 {
+    LOG("<pre>"
+        "List before delete:\n");
+    list_dump(*list);
+
+    list->data[pos] = EMPTY_POS;
+    list->next[list->prev[pos]] = list->next[pos];
+    list->prev[list->next[pos]] = list->prev[pos];
+
+    list->next[pos] = list->prev[pos] = FREE_POS;
+
+    LOG("List AFTER delete:\n");
+    list_dump(*list);
+    LOG("</pre>");
+
     return OK;
 }
 
@@ -238,7 +254,7 @@ err_code_t make_graph(char *filename, my_list *list)
     {
         if (list->next[i] != -1)
         {
-            DOT_("g%zd:<p%zd>:w -> g%zd:<i%zd>:e;\n", i, i, list->next[i], list->next[i]);
+            DOT_("g%zd:<p%zd>:e -> g%zd:<i%zd>:w;\n", i, i, list->next[i], list->next[i]);
         }
     }
 
@@ -247,7 +263,7 @@ err_code_t make_graph(char *filename, my_list *list)
     {
         if (list->prev[i] != -1)
         {
-            DOT_("g%zd:<n%zd>:e -> g%zd:<i%zd>:w;\n", i, i, list->prev[i], list->prev[i]);
+            DOT_("g%zd:<n%zd>:w -> g%zd:<i%zd>:e;\n", i, i, list->prev[i], list->prev[i]);
         }
     }
 

@@ -25,7 +25,7 @@ err_code_t list_dump(my_list list);
 err_code_t print_list(my_list list);
 
 err_code_t list_insert(my_list *list, size_t pos, list_val_t value);
-err_code_t list_remove(my_list list);
+err_code_t list_remove(my_list *list, size_t pos);
 
 size_t find_first_free(my_list list);
 
