@@ -23,11 +23,13 @@ err_code_t list_ctor(my_list *list, size_t size)
 
     for (size_t i = 1; i < size; i++)
     {
-        list->prev[i] = list->next[i] = FREE_POS;
+        list->prev[i] = -i - 1;
+        list->next[i] = FREE_POS;
     }
 
     list->next[0] = 0;
     list->prev[0] = 0;
+    list->free    = 1;
 
     return OK;
 }
@@ -102,14 +104,18 @@ err_code_t list_insert(my_list *list, size_t pos, list_val_t value)
         "List before insert:\n");
     list_dump(*list);
 
-    list->free = find_first_free(*list);
+    // list->free = find_first_free(*list);
+    labels_t free_buffer = -list->prev[list->free];
+
     list->data[list->free] = value;
 
     list->next[list->free] = list->next[pos];
-    list->next[pos]    = list->free;
+    list->next[pos]        = list->free;
 
-    list->prev[list->free] = pos;
+    list->prev[list->free]             = pos;
     list->prev[list->next[list->free]] = list->free;
+
+    list->free = free_buffer;
 
     LOG("\nList AFTER insert:\n");
     list_dump(*list);
@@ -241,20 +247,28 @@ err_code_t make_graph(char *filename, my_list *list)
     DOT_("edge[weight=1, color=\"#FF0000\"];\n");
     for (size_t i = 0; i < list->size - 1; i++)
     {
-        if (list->next[i] != -1)
+        if (list->next[i] != FREE_POS)
         {
             DOT_("g%zd:<p%zd>:s -> g%zd:<p%zd>:s;\n", i, i, list->next[i], list->next[i]);
         }
     }
 
+    DOT_("free_var[shape=record; label=\"free = %zd\"];", list->free);
+    DOT_("free_var->g%d;", list->free);
+
     DOT_("edge[weight=1, color=\"#00FF00\", constraint = false];\n");
     for (size_t i = 0; i < list->size - 1; i++)
     {
-        if (list->prev[i] != -1)
+        if (list->prev[i] >= 0)
         {
             DOT_("g%zd:<i%zd>:n -> g%zd:<i%zd>:n;\n", i, i, list->prev[i], list->prev[i]);
         }
+        else
+        {
+            DOT_("g%zd:<i%zd>:n -> g%zd:<i%zd>:n [color=\"\#000F00\"];\n", i, i, -list->prev[i], -list->prev[i]);
+        }
     }
+
 
     DOT_("}\n");
     fclose(dot_file);
