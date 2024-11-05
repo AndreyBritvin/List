@@ -22,6 +22,7 @@ int main()
     print_list(test_list);
 
     list_remove(&test_list, 3);
+    print_list(test_list);
 
     list_dtor(&test_list);
     disable_logging();

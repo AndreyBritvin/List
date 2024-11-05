@@ -16,7 +16,7 @@ err_code_t list_ctor(my_list *list, size_t size)
     list->next = (labels_t   *) calloc(size, sizeof(labels_t  ));
     list->prev = (labels_t   *) calloc(size, sizeof(labels_t  ));
 
-    if (!(list->data && list->next && list->prev))
+    if (!(list->data && list->next && list->prev)) // CHECK if any is null
     {
         return ERROR_LIST_ALLOCATION_MEMORY;
     }
@@ -84,12 +84,11 @@ err_code_t list_dump(my_list list)
 
 err_code_t print_list(my_list list)
 {
-    size_t i = 1;
-    // while (list.next[i] != 0)
+    labels_t previous_next = list.next[0];
+    while (list.next[previous_next] != list.next[0])
     {
-        // printf("%d ", list.data[list.next[i]]);
-
-        i++;
+        printf("%d ", list.data[previous_next]);
+        previous_next = list.next[previous_next];
     }
 
     printf("\n");
@@ -99,36 +98,18 @@ err_code_t print_list(my_list list)
 
 err_code_t list_insert(my_list *list, size_t pos, list_val_t value)
 {
-    pos += 1;
     LOG("<pre>"
         "List before insert:\n");
     list_dump(*list);
-//
-//     if (list->head == 0)
-//     {
-//         list->data[1] = value;
-//         list->next[1] = 0;
-//         list->prev[1] = 0;
-//         list->head    = 1;
-//         list->free    = 2;
-//     }
 
-    // else
-    // {
-        list->free = find_first_free(*list);
-        list->data[list->free] = value;
+    list->free = find_first_free(*list);
+    list->data[list->free] = value;
 
-        // labels_t buffer        = list->next[pos - 1];
-        list->next[list->free] = list->next[pos - 1];
-        list->next[pos - 1]    = list->free;
+    list->next[list->free] = list->next[pos];
+    list->next[pos]    = list->free;
 
-        // buffer                 = list->prev[pos - 1]; // TODO - remove -1 via prev array
-        // printf("\n\nPos = %lu, buffer = %d, free = %d \n", pos, buffer, list->free);
-        // list_dump(*list);
-        // list->prev[pos - 1]    = list->free;
-        list->prev[list->free] = pos - 1;
-        list->prev[list->next[list->free]] = list->free;
-    // }
+    list->prev[list->free] = pos;
+    list->prev[list->next[list->free]] = list->free;
 
     LOG("\nList AFTER insert:\n");
     list_dump(*list);
