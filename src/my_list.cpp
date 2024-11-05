@@ -147,11 +147,13 @@ err_code_t list_remove(my_list *list, size_t pos)
         "List before delete:\n");
     list_dump(*list);
 
-    list->data[pos] = EMPTY_POS;
+    list->data[pos]             = EMPTY_POS;
     list->next[list->prev[pos]] = list->next[pos];
     list->prev[list->next[pos]] = list->prev[pos];
 
-    list->next[pos] = list->prev[pos] = FREE_POS;
+    list->next[pos] = FREE_POS;
+    list->prev[pos] = -list->free;
+    list->free      = pos;
 
     LOG("List AFTER delete:\n");
     list_dump(*list);
