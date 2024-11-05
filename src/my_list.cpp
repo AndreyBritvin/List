@@ -162,6 +162,16 @@ err_code_t list_remove(my_list *list, size_t pos)
     return OK;
 }
 
+labels_t get_head(my_list *list)
+{
+    return list->prev[0];
+}
+
+labels_t get_tail(my_list *list)
+{
+    return list->next[0];
+}
+
 //TODO: MOVE TO ANOTHER FILE
 err_code_t enable_logging(const char *filename)
 {

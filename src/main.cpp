@@ -6,7 +6,7 @@ int main()
     list_ctor(&test_list, 10);
     enable_logging("list_dump/dump.html");
 
-    list_insert(&test_list, 0, 2);
+    list_insert(&test_list, get_tail(&test_list), 2);
     print_list(test_list);
 
     list_insert(&test_list, 1, 4);
@@ -22,6 +22,9 @@ int main()
     print_list(test_list);
 
     list_remove(&test_list, 3);
+    print_list(test_list);
+
+    list_insert(&test_list, get_head(&test_list), 90);
     print_list(test_list);
 
     list_dtor(&test_list);
