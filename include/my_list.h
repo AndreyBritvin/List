@@ -30,8 +30,6 @@ err_code_t list_remove(my_list *list, size_t pos);
 labels_t get_head(my_list *list);
 labels_t get_tail(my_list *list);
 
-size_t find_first_free(my_list list);
-
 err_code_t enable_logging (const char *filename);
 err_code_t disable_logging();
 

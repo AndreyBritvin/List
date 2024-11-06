@@ -27,6 +27,12 @@ int main()
     list_insert(&test_list, get_head(&test_list), 90);
     print_list(test_list);
 
+    list_remove(&test_list, 1);
+    print_list(test_list);
+
+    list_insert(&test_list, 2, 20);
+    print_list(test_list);
+
     list_dtor(&test_list);
     disable_logging();
 

@@ -23,8 +23,8 @@ err_code_t list_ctor(my_list *list, size_t size)
 
     for (size_t i = 1; i < size; i++)
     {
-        list->prev[i] = -i - 1;
-        list->next[i] = FREE_POS;
+        list->next[i] = -i - 1;
+        list->prev[i] = FREE_POS;
     }
 
     list->next[0] = 0;
@@ -100,12 +100,12 @@ err_code_t print_list(my_list list)
 
 err_code_t list_insert(my_list *list, size_t pos, list_val_t value)
 {
-    LOG("<pre>"
-        "List before insert:\n");
+    LOG("<pre>------------------------------------------------------------------"
+        "\nList before insert:\n");
     list_dump(*list);
 
     // list->free = find_first_free(*list);
-    labels_t free_buffer = -list->prev[list->free];
+    labels_t free_buffer = -list->next[list->free];
 
     list->data[list->free] = value;
 
@@ -119,26 +119,10 @@ err_code_t list_insert(my_list *list, size_t pos, list_val_t value)
 
     LOG("\nList AFTER insert:\n");
     list_dump(*list);
-    LOG("</pre>");
+    LOG("\nEnd list dump\n------------------------------------------------------------------"
+        "</pre>");
 
     return OK;
-}
-
-size_t find_first_free(my_list list)
-{
-    size_t first_free_pos = 1;
-
-    for (size_t i = 0; i < list.size; i++)
-    {
-        if (list.next[i] == FREE_POS)
-        {
-            first_free_pos = i;
-            break;
-        }
-    }
-
-
-    return first_free_pos;
 }
 
 err_code_t list_remove(my_list *list, size_t pos)
@@ -151,8 +135,8 @@ err_code_t list_remove(my_list *list, size_t pos)
     list->next[list->prev[pos]] = list->next[pos];
     list->prev[list->next[pos]] = list->prev[pos];
 
-    list->next[pos] = FREE_POS;
-    list->prev[pos] = -list->free;
+    list->prev[pos] = FREE_POS;
+    list->next[pos] = -list->free;
     list->free      = pos;
 
     LOG("List AFTER delete:\n");
@@ -212,9 +196,9 @@ size_t generate_graph(my_list *list)
     return graphs_counter;
 }
 
+#define DOT_(...) fprintf(dot_file, __VA_ARGS__)
 err_code_t make_graph(char *filename, my_list *list)
 {
-#define DOT_(...) fprintf(dot_file, __VA_ARGS__)
     FILE * SAFE_OPEN_FILE(dot_file, filename, "w");
 
     DOT_("digraph{\n");
@@ -229,62 +213,42 @@ err_code_t make_graph(char *filename, my_list *list)
                                                 i, i, i, i, list->data[i], i, list->next[i], i, list->prev[i]);
     }
 
-//     DOT_("{rank = same;");
-//     for (size_t i = 0; i < list->size; i++)
-//     {
-//         DOT_("g%zd;", i);
-//
-//     }
-//     DOT_("} \ng0");
-//
-//     for (size_t i = 1; i < list->size; i++)
-//     {
-//         DOT_("->g%zd", i);
-//     }
-//     DOT_("[color=invis, weight=10];\n");
-
     DOT_("edge[weight=10 color=invis];\n");
     for (size_t i = 0; i < list->size - 1; i++)
     {
-        if (i % 2 == 0)
-        {
-            DOT_("g%zd:<i%zd> -> g%zd:<i%zd>;\n", i, i, i + 1, i + 1);
-        }
-        else
-        {
-            DOT_("g%zd:<p%zd> -> g%zd:<p%zd>;\n", i, i, i + 1, i + 1); // cringe?
-        }
+        DOT_("g%zd:<i%zd> -> g%zd:<i%zd>;\n", i, i, i + 1, i + 1);
     }
 
     DOT_("edge[weight=1, color=\"#FF0000\"];\n");
     for (size_t i = 0; i < list->size - 1; i++)
     {
-        if (list->next[i] != FREE_POS)
+        if (list->next[i] >= 0)
         {
-            DOT_("g%zd:<p%zd>:s -> g%zd:<p%zd>:s;\n", i, i, list->next[i], list->next[i]);
+            DOT_("g%zd:<p%zd>:s -> g%zd:<p%zd>:s [color = \"#DD%d00%d\"];\n", i, i, list->next[i], list->next[i],
+                                                                (i % 2) * 6, (i % 2) * 9);
+        }
+        else
+        {
+            DOT_("g%zd:<i%zd>:n -> g%zd:<i%zd>:n [color=\"#0F0FFF\"];\n", i, i, -list->next[i], -list->next[i]);
         }
     }
 
     DOT_("free_var[shape=record; label=\"free = %zd\"];", list->free);
-    DOT_("free_var->g%d;", list->free);
+    DOT_("free_var->g%d [color = blue];", list->free);
 
     DOT_("edge[weight=1, color=\"#00FF00\", constraint = false];\n");
     for (size_t i = 0; i < list->size - 1; i++)
     {
-        if (list->prev[i] >= 0)
+        if (list->prev[i] != FREE_POS)
         {
-            DOT_("g%zd:<i%zd>:n -> g%zd:<i%zd>:n;\n", i, i, list->prev[i], list->prev[i]);
-        }
-        else
-        {
-            DOT_("g%zd:<i%zd>:n -> g%zd:<i%zd>:n [color=\"\#000F00\"];\n", i, i, -list->prev[i], -list->prev[i]);
+            DOT_("g%zd:<i%zd>:n -> g%zd:<i%zd>:n[color=\"#%dFAA0%d\"];\n",
+                     i, i, list->prev[i], list->prev[i], (i % 2) * 9, (i % 2) * 9);
         }
     }
-
 
     DOT_("}\n");
     fclose(dot_file);
 
     return OK;
-#undef DOT_
 }
+#undef DOT_
