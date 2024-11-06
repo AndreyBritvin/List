@@ -3,6 +3,12 @@
 
 #include <stdlib.h>
 #include "utils.h"
+#include <stdio.h>
+
+// extern FILE* LOG_FILE;
+
+const int  FREE_POS = -1;
+const int EMPTY_POS =  0;
 
 typedef int list_val_t;
 typedef int labels_t;
@@ -20,7 +26,6 @@ struct my_list
 err_code_t list_ctor(my_list *list, size_t size);
 err_code_t list_dtor(my_list *list);
 
-err_code_t list_dump(my_list list);
 err_code_t print_list(my_list *list);
 
 err_code_t list_insert(my_list *list, size_t pos, list_val_t value);
@@ -31,9 +36,7 @@ labels_t get_tail(my_list *list);
 
 err_code_t list_verificator(my_list list);
 
-err_code_t enable_logging (const char *filename);
-err_code_t disable_logging();
-
+err_code_t list_dump(my_list list);
 size_t generate_graph(my_list *list);
 err_code_t make_graph(char *filename, my_list *list);
 

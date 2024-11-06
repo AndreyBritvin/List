@@ -6,14 +6,20 @@ CFLAGS =  -lm -D _DEBUG -ggdb3 -std=c++17 -O0 -Wall -Wextra -Weffc++ -Waggressiv
 
 all: list.out
 
-list.out: build/main.o build/my_list.o
-	@$(CC) $(CFLAGS) $(INCLUDE) build/main.o build/my_list.o -o list.out
+list.out: build/main.o build/my_list.o build/my_log.o build/list_dump.o
+	@$(CC) $(CFLAGS) $(INCLUDE) build/main.o build/my_list.o build/my_log.o build/list_dump.o -o list.out
 
 build/main.o: src/main.cpp
 	@$(CC) $(CFLAGS) $(INCLUDE) -c src/main.cpp -o build/main.o
 
 build/my_list.o: src/my_list.cpp include/my_list.h
 	@$(CC) $(CFLAGS) $(INCLUDE) -c src/my_list.cpp -o build/my_list.o
+
+build/list_dump.o: src/list_dump.cpp include/my_list.h
+	@$(CC) $(CFLAGS) $(INCLUDE) -c src/list_dump.cpp -o build/list_dump.o
+
+build/my_log.o: src/my_log.cpp include/my_log.h
+	@$(CC) $(CFLAGS) $(INCLUDE) -c src/my_log.cpp -o build/my_log.o
 
 run:
 	./list.out

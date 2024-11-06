@@ -11,8 +11,6 @@
                             return ERROR_FILE;                                     \
                         }
 
-#define LOG(...) if (LOG_FILE != NULL) fprintf(LOG_FILE, __VA_ARGS__)
-
 // header utils
 typedef int err_code_t;
 
