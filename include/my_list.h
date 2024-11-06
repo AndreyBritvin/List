@@ -4,8 +4,7 @@
 #include <stdlib.h>
 #include "utils.h"
 #include <stdio.h>
-
-// extern FILE* LOG_FILE;
+#include "list_dsl.h"
 
 const int  FREE_POS = -1;
 const int EMPTY_POS =  0;

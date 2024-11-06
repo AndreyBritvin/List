@@ -18,24 +18,24 @@ err_code_t list_ctor(my_list *list, size_t capacity)
     assert(list != NULL);
 
     list->capacity = capacity;
-    list->data = (list_val_t *) calloc(capacity, sizeof(list_val_t));
-    list->next = (labels_t   *) calloc(capacity, sizeof(labels_t  ));
-    list->prev = (labels_t   *) calloc(capacity, sizeof(labels_t  ));
+    DATA = (list_val_t *) calloc(capacity, sizeof(list_val_t));
+    NEXT = (labels_t   *) calloc(capacity, sizeof(labels_t  ));
+    PREV = (labels_t   *) calloc(capacity, sizeof(labels_t  ));
 
-    if (!(list->data && list->next && list->prev)) // CHECK if any is null
+    if (!(DATA && NEXT && PREV)) // CHECK if any is null
     {
         return ERROR_LIST_ALLOCATION_MEMORY;
     }
 
     for (size_t i = 1; i < capacity; i++)
     {
-        list->next[i] = -i - 1;
-        list->prev[i] = FREE_POS;
+        NEXT[i] = -i - 1;
+        PREV[i] = FREE_POS;
     }
 
-    list->next[0] = 0;
-    list->prev[0] = 0;
-    list->free    = 1;
+    NEXT[0] = 0;
+    PREV[0] = 0;
+    FREE    = 1;
     list->size    = 0;
 
     return OK;
@@ -49,13 +49,13 @@ err_code_t list_dtor(my_list *list)
 
     for (size_t i = 0; i < list->size; i++)
     {
-        list->data[i] = EMPTY_POS;
-        list->next[i] = list->prev[i] = EMPTY_POS;
+        DATA[i] = EMPTY_POS;
+        NEXT[i] = PREV[i] = EMPTY_POS;
     }
 
-    free(list->data); list->data = NULL;
-    free(list->next); list->next = NULL;
-    free(list->prev); list->prev = NULL;
+    free(DATA); DATA = NULL;
+    free(NEXT); NEXT = NULL;
+    free(PREV); PREV = NULL;
 
     return OK;
 }
@@ -66,11 +66,11 @@ err_code_t print_list(my_list *list)
 
     CHECK_LIST;
 
-    labels_t          previous_next   = list->next[0];
-    while (list->next[previous_next] != list->next[0])
+    labels_t          previous_next   = NEXT[0];
+    while (NEXT[previous_next] != NEXT[0])
     {
-        printf("%d ", list->data[previous_next]);
-        previous_next = list->next[previous_next];
+        printf("%d ", DATA[previous_next]);
+        previous_next = NEXT[previous_next];
     }
 
     printf("\n");
@@ -92,17 +92,17 @@ err_code_t list_insert(my_list *list, size_t pos, list_val_t value)
         "\nList before insert:\n");
     list_dump(*list);
 
-    labels_t free_buffer = -list->next[list->free]; // TODO: DSL
+    labels_t free_buffer = -NEXT[FREE]; // TODO: DSL
 
-    list->data[list->free] = value;
+    DATA[FREE] = value;
 
-    list->next[list->free] = list->next[pos];
-    list->next[pos]        = list->free;
+    NEXT[FREE] = NEXT[pos];
+    NEXT[pos]  = FREE;
 
-    list->prev[list->free]             = pos;
-    list->prev[list->next[list->free]] = list->free;
+    PREV[FREE]       = pos;
+    PREV[NEXT[FREE]] = FREE;
 
-    list->free = free_buffer;
+    FREE = free_buffer;
     list->size += 1;
 
     LOG("\nList AFTER insert:\n");
@@ -128,13 +128,13 @@ err_code_t list_remove(my_list *list, size_t pos)
         "List before delete:\n");
     list_dump(*list);
 
-    list->data[pos]             = EMPTY_POS;
-    list->next[list->prev[pos]] = list->next[pos];
-    list->prev[list->next[pos]] = list->prev[pos];
+    DATA[pos]       = EMPTY_POS;
+    NEXT[PREV[pos]] = NEXT[pos];
+    PREV[NEXT[pos]] = PREV[pos];
 
-    list->prev[pos] = FREE_POS;
-    list->next[pos] = -list->free;
-    list->free      = pos;
+    PREV[pos] = FREE_POS;
+    NEXT[pos] = -FREE;
+    FREE      = pos;
     list->size -= 1;
 
     LOG("\nList AFTER delete:\n");
@@ -180,12 +180,12 @@ labels_t get_head(my_list *list)
 {
     assert(list != NULL);
 
-    return list->prev[0];
+    return PREV[0];
 }
 
 labels_t get_tail(my_list *list)
 {
     assert(list != NULL);
 
-    return list->next[0];
+    return NEXT[0];
 }
