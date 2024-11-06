@@ -80,7 +80,7 @@ err_code_t list_dump(my_list list)
     }
 
     LOG("\nPrinting [prev]: ");
-    for (size_t i = 0; i < list.capacity; i++)
+    for (size_t i = 0; i < list.capacity; i++) // TODO: 1 f0r
     {
         LOG("%02d ", list.prev[i]);
     }
@@ -123,7 +123,7 @@ err_code_t list_insert(my_list *list, size_t pos, list_val_t value)
         "\nList before insert:\n");
     list_dump(*list);
 
-    labels_t free_buffer = -list->next[list->free];
+    labels_t free_buffer = -list->next[list->free]; // TODO: DSL
 
     list->data[list->free] = value;
 
@@ -225,7 +225,7 @@ err_code_t enable_logging(const char *filename)
 
 err_code_t disable_logging()
 {
-    fclose(LOG_FILE);
+    fclose(LOG_FILE); // TODO: check for double close
 
     return OK;
 }
@@ -234,14 +234,13 @@ size_t generate_graph(my_list *list)
 {
     static size_t graphs_counter = 0;
 
-    char *txt_filename      = "list_dump/txt/%lu.dot";
-    char *base_command      = "dot list_dump/txt/%lu.dot -o list_dump/img/%lu.png -Tpng";
-    char *implementation    = (char *) calloc(strlen(base_command) + 20, sizeof(char));
-    char *txt_full_filename = (char *) calloc(strlen(txt_filename) + 20, sizeof(char));
+    const char *txt_filename = "list_dump/txt/%lu.dot";
+    const char *base_command = "dot list_dump/txt/%lu.dot -o list_dump/img/%lu.png -Tpng";
+    char *implementation     = (char *) calloc(strlen(base_command) + 20, sizeof(char));
+    char *txt_full_filename  = (char *) calloc(strlen(txt_filename) + 20, sizeof(char));
 
-    sprintf(implementation, "dot list_dump/txt/%lu.dot -o list_dump/img/%lu.png -Tpng",
-                                         graphs_counter, graphs_counter);
-    sprintf(txt_full_filename,  "list_dump/txt/%lu.dot", graphs_counter);
+    sprintf(implementation, base_command, graphs_counter, graphs_counter);
+    sprintf(txt_full_filename, txt_filename, graphs_counter);
 
     printf("File to create:  %s\n", txt_full_filename);
     printf("Command to call: %s\n", implementation);
