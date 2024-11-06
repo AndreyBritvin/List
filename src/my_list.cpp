@@ -4,24 +4,31 @@
 #include <string.h>
 #include <stdlib.h>
 
+#define CHECK_LIST; if(err_code_t err_num = list_verificator(*list))     \
+    {                                                                   \
+        fprintf(stderr, "Error %d occured, check enum :(\n", err_num);  \
+                                                                        \
+        return err_num;                                                 \
+    }                                                                   \
+
 const int  FREE_POS = -1;
 const int EMPTY_POS =  0;
 
 static FILE * LOG_FILE = NULL;
 
-err_code_t list_ctor(my_list *list, size_t size)
+err_code_t list_ctor(my_list *list, size_t capacity)
 {
-    list->size = size;
-    list->data = (list_val_t *) calloc(size, sizeof(list_val_t));
-    list->next = (labels_t   *) calloc(size, sizeof(labels_t  ));
-    list->prev = (labels_t   *) calloc(size, sizeof(labels_t  ));
+    list->capacity = capacity;
+    list->data = (list_val_t *) calloc(capacity, sizeof(list_val_t));
+    list->next = (labels_t   *) calloc(capacity, sizeof(labels_t  ));
+    list->prev = (labels_t   *) calloc(capacity, sizeof(labels_t  ));
 
     if (!(list->data && list->next && list->prev)) // CHECK if any is null
     {
         return ERROR_LIST_ALLOCATION_MEMORY;
     }
 
-    for (size_t i = 1; i < size; i++)
+    for (size_t i = 1; i < capacity; i++)
     {
         list->next[i] = -i - 1;
         list->prev[i] = FREE_POS;
@@ -30,12 +37,15 @@ err_code_t list_ctor(my_list *list, size_t size)
     list->next[0] = 0;
     list->prev[0] = 0;
     list->free    = 1;
+    list->size    = 0;
 
     return OK;
 }
 
 err_code_t list_dtor(my_list *list)
 {
+    CHECK_LIST;
+
     for (size_t i = 0; i < list->size; i++)
     {
         list->data[i] = EMPTY_POS;
@@ -52,30 +62,31 @@ err_code_t list_dtor(my_list *list)
 err_code_t list_dump(my_list list)
 {
     LOG("\nList index =     ");
-    for (size_t i = 0; i < list.size; i++)
+    for (size_t i = 0; i < list.capacity; i++)
     {
         LOG("%02lu ", i);
     }
 
     LOG("\nPrinting [data]: ");
-    for (size_t i = 0; i < list.size; i++)
+    for (size_t i = 0; i < list.capacity; i++)
     {
         LOG("%02d ", list.data[i]);
     }
 
     LOG("\nPrinting [next]: ");
-    for (size_t i = 0; i < list.size; i++)
+    for (size_t i = 0; i < list.capacity; i++)
     {
         LOG("%02d ", list.next[i]);
     }
 
     LOG("\nPrinting [prev]: ");
-    for (size_t i = 0; i < list.size; i++)
+    for (size_t i = 0; i < list.capacity; i++)
     {
         LOG("%02d ", list.prev[i]);
     }
 
     LOG("\n");
+    LOG("List size = %zd\n", list.size);
 
     size_t graph_num = generate_graph(&list) - 1;
 
@@ -84,13 +95,15 @@ err_code_t list_dump(my_list list)
     return OK;
 }
 
-err_code_t print_list(my_list list)
+err_code_t print_list(my_list *list)
 {
-    labels_t previous_next = list.next[0];
-    while (list.next[previous_next] != list.next[0])
+    CHECK_LIST;
+
+    labels_t previous_next = list->next[0];
+    while (list->next[previous_next] != list->next[0])
     {
-        printf("%d ", list.data[previous_next]);
-        previous_next = list.next[previous_next];
+        printf("%d ", list->data[previous_next]);
+        previous_next = list->next[previous_next];
     }
 
     printf("\n");
@@ -100,11 +113,16 @@ err_code_t print_list(my_list list)
 
 err_code_t list_insert(my_list *list, size_t pos, list_val_t value)
 {
+    CHECK_LIST;
+    if (list->size >= list->capacity - 1)
+    {
+        return ERROR_LIST_OVERFLOW;
+    }
+
     LOG("<pre>------------------------------------------------------------------"
         "\nList before insert:\n");
     list_dump(*list);
 
-    // list->free = find_first_free(*list);
     labels_t free_buffer = -list->next[list->free];
 
     list->data[list->free] = value;
@@ -116,6 +134,7 @@ err_code_t list_insert(my_list *list, size_t pos, list_val_t value)
     list->prev[list->next[list->free]] = list->free;
 
     list->free = free_buffer;
+    list->size += 1;
 
     LOG("\nList AFTER insert:\n");
     list_dump(*list);
@@ -127,6 +146,13 @@ err_code_t list_insert(my_list *list, size_t pos, list_val_t value)
 
 err_code_t list_remove(my_list *list, size_t pos)
 {
+    CHECK_LIST;
+
+    if ((int) list->size <= 0)
+    {
+        return ERROR_LIST_EMPTY;
+    }
+
     LOG("<pre>"
         "List before delete:\n");
     list_dump(*list);
@@ -138,10 +164,43 @@ err_code_t list_remove(my_list *list, size_t pos)
     list->prev[pos] = FREE_POS;
     list->next[pos] = -list->free;
     list->free      = pos;
+    list->size -= 1;
 
-    LOG("List AFTER delete:\n");
+    LOG("\nList AFTER delete:\n");
     list_dump(*list);
-    LOG("</pre>");
+    LOG("\nEnd list dump\n------------------------------------------------------------------"
+        "</pre>");
+    return OK;
+}
+
+err_code_t list_verificator(my_list list)
+{
+    if (list.size >= list.capacity)
+    {
+        return ERROR_LIST_OVERFLOW;
+    }
+
+    if ((int) list.size < 0)
+    {
+        return ERROR_LIST_EMPTY;
+    }
+
+    labels_t curr_pos = list.next[0];
+    labels_t previous_index = 0;
+    for (size_t i = 0; i < list.size; i++)
+    {
+        previous_index = curr_pos;
+        curr_pos       = list.next[curr_pos];
+        if (list.prev[curr_pos] != previous_index)
+        {
+            return ERROR_LIST_PREV_CORRUPTED;
+        }
+    }
+
+    if (previous_index != list.prev[0])
+    {
+        return ERROR_LIST_LOOPED;
+    }
 
     return OK;
 }
@@ -177,11 +236,12 @@ size_t generate_graph(my_list *list)
 
     char *txt_filename      = "list_dump/txt/%lu.dot";
     char *base_command      = "dot list_dump/txt/%lu.dot -o list_dump/img/%lu.png -Tpng";
-    char *implementation     = (char *) calloc(strlen(base_command) + 20, sizeof(char));
+    char *implementation    = (char *) calloc(strlen(base_command) + 20, sizeof(char));
     char *txt_full_filename = (char *) calloc(strlen(txt_filename) + 20, sizeof(char));
 
-    sprintf(implementation, "dot list_dump/txt/%lu.dot -o list_dump/img/%lu.png -Tpng", graphs_counter, graphs_counter);
-    sprintf(txt_full_filename, "list_dump/txt/%lu.dot", graphs_counter);
+    sprintf(implementation, "dot list_dump/txt/%lu.dot -o list_dump/img/%lu.png -Tpng",
+                                         graphs_counter, graphs_counter);
+    sprintf(txt_full_filename,  "list_dump/txt/%lu.dot", graphs_counter);
 
     printf("File to create:  %s\n", txt_full_filename);
     printf("Command to call: %s\n", implementation);
@@ -204,7 +264,7 @@ err_code_t make_graph(char *filename, my_list *list)
     DOT_("digraph{\n");
     DOT_("rankdir = LR;\n splines=true;\n");
 
-    for (size_t i = 0; i < list->size; i++)
+    for (size_t i = 0; i < list->capacity; i++)
     {
         DOT_("g%zd [shape = record, label = \"<i%zd> index = %zd |"
                                              "<d%zd> data  = %d  |"
@@ -214,13 +274,13 @@ err_code_t make_graph(char *filename, my_list *list)
     }
 
     DOT_("edge[weight=10 color=invis];\n");
-    for (size_t i = 0; i < list->size - 1; i++)
+    for (size_t i = 0; i < list->capacity - 1; i++)
     {
         DOT_("g%zd:<i%zd> -> g%zd:<i%zd>;\n", i, i, i + 1, i + 1);
     }
 
     DOT_("edge[weight=1, color=\"#FF0000\"];\n");
-    for (size_t i = 0; i < list->size - 1; i++)
+    for (size_t i = 0; i < list->capacity - 1; i++)
     {
         if (list->next[i] >= 0)
         {
@@ -237,7 +297,7 @@ err_code_t make_graph(char *filename, my_list *list)
     DOT_("free_var->g%d [color = blue];", list->free);
 
     DOT_("edge[weight=1, color=\"#00FF00\", constraint = false];\n");
-    for (size_t i = 0; i < list->size - 1; i++)
+    for (size_t i = 0; i < list->capacity - 1; i++)
     {
         if (list->prev[i] != FREE_POS)
         {

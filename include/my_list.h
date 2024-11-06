@@ -9,26 +9,27 @@ typedef int labels_t;
 
 struct my_list
 {
-    list_val_t *data;
-    labels_t   *next;
-    labels_t   *prev;
-    size_t      size;
-    size_t      head;
-    size_t      tail;
-    labels_t    free;
+    list_val_t *     data;
+    labels_t   *     next;
+    labels_t   *     prev;
+    labels_t         free;
+    size_t           size;
+    size_t       capacity;
 };
 
 err_code_t list_ctor(my_list *list, size_t size);
 err_code_t list_dtor(my_list *list);
 
 err_code_t list_dump(my_list list);
-err_code_t print_list(my_list list);
+err_code_t print_list(my_list *list);
 
 err_code_t list_insert(my_list *list, size_t pos, list_val_t value);
 err_code_t list_remove(my_list *list, size_t pos);
 
 labels_t get_head(my_list *list);
 labels_t get_tail(my_list *list);
+
+err_code_t list_verificator(my_list list);
 
 err_code_t enable_logging (const char *filename);
 err_code_t disable_logging();
