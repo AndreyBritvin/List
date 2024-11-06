@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #define CHECK_LIST; if(err_code_t err_num = list_verificator(*list))     \
     {                                                                   \
@@ -18,6 +19,8 @@ static FILE * LOG_FILE = NULL;
 
 err_code_t list_ctor(my_list *list, size_t capacity)
 {
+    assert(list != NULL);
+
     list->capacity = capacity;
     list->data = (list_val_t *) calloc(capacity, sizeof(list_val_t));
     list->next = (labels_t   *) calloc(capacity, sizeof(labels_t  ));
@@ -44,6 +47,8 @@ err_code_t list_ctor(my_list *list, size_t capacity)
 
 err_code_t list_dtor(my_list *list)
 {
+    assert(list != NULL);
+
     CHECK_LIST;
 
     for (size_t i = 0; i < list->size; i++)
@@ -97,6 +102,8 @@ err_code_t list_dump(my_list list)
 
 err_code_t print_list(my_list *list)
 {
+    assert(list != NULL);
+
     CHECK_LIST;
 
     labels_t previous_next = list->next[0];
@@ -113,6 +120,8 @@ err_code_t print_list(my_list *list)
 
 err_code_t list_insert(my_list *list, size_t pos, list_val_t value)
 {
+    assert(list != NULL);
+
     CHECK_LIST;
     if (list->size >= list->capacity - 1)
     {
@@ -146,6 +155,8 @@ err_code_t list_insert(my_list *list, size_t pos, list_val_t value)
 
 err_code_t list_remove(my_list *list, size_t pos)
 {
+    assert(list != NULL);
+
     CHECK_LIST;
 
     if ((int) list->size <= 0)
@@ -207,17 +218,23 @@ err_code_t list_verificator(my_list list)
 
 labels_t get_head(my_list *list)
 {
+    assert(list != NULL);
+
     return list->prev[0];
 }
 
 labels_t get_tail(my_list *list)
 {
+    assert(list != NULL);
+
     return list->next[0];
 }
 
 //TODO: MOVE TO ANOTHER FILE
 err_code_t enable_logging(const char *filename)
 {
+    assert(filename != NULL);
+
     SAFE_OPEN_FILE(LOG_FILE, filename, "w");
 
     return OK;
@@ -232,6 +249,8 @@ err_code_t disable_logging()
 
 size_t generate_graph(my_list *list)
 {
+    assert(list != NULL);
+
     static size_t graphs_counter = 0;
 
     const char *txt_filename = "list_dump/txt/%lu.dot";
@@ -258,6 +277,9 @@ size_t generate_graph(my_list *list)
 #define DOT_(...) fprintf(dot_file, __VA_ARGS__)
 err_code_t make_graph(char *filename, my_list *list)
 {
+    assert(filename != NULL);
+    assert(list     != NULL);
+
     FILE * SAFE_OPEN_FILE(dot_file, filename, "w");
 
     DOT_("digraph{\n");
