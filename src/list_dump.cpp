@@ -7,6 +7,15 @@
 #include "my_log.h"
 #include "list_dsl.h"
 
+static err_code_t generate_nodes    (FILE* dot_file, my_list list);
+static err_code_t place_nodes_in_row(FILE* dot_file, my_list list);
+static err_code_t connect_next      (FILE* dot_file, my_list list);
+static err_code_t connect_prev      (FILE* dot_file, my_list list);
+static err_code_t place_free_node   (FILE* dot_file, my_list list);
+static err_code_t init_graph        (FILE* dot_file, my_list list);
+static err_code_t end_graph         (FILE* dot_file, my_list list);
+
+
 err_code_t list_dump(my_list list)
 {
     // printf("File ptr = %p\n", LOG_FILE);
@@ -78,9 +87,25 @@ err_code_t make_graph(char *filename, my_list list)
 
     FILE * SAFE_OPEN_FILE(dot_file, filename, "w");
 
-    DOT_("digraph{\n");
-    DOT_("rankdir = LR;\n splines=true;\n");
+    init_graph(dot_file, list);
 
+    generate_nodes(dot_file, list);
+
+    place_nodes_in_row(dot_file, list);
+
+    connect_next(dot_file, list);
+
+    place_free_node(dot_file, list);
+    connect_prev(dot_file, list);
+    end_graph(dot_file, list);
+
+    fclose(dot_file);
+
+    return OK;
+}
+
+static err_code_t generate_nodes(FILE* dot_file, my_list list)
+{
     for (size_t i = 0; i < list.capacity; i++)
     {
         DOT_("g%zd [shape = record, label = \"<i%zd> index = %zd |"
@@ -90,12 +115,22 @@ err_code_t make_graph(char *filename, my_list list)
                                                 i, i, i, i, DATA[i], i, NEXT[i], i, PREV[i]);
     }
 
+    return OK;
+}
+
+static err_code_t place_nodes_in_row(FILE* dot_file, my_list list)
+{
     DOT_("edge[weight=10 color=invis];\n");
     for (size_t i = 0; i < list.capacity - 1; i++)
     {
         DOT_("g%zd:<i%zd> -> g%zd:<i%zd>;\n", i, i, i + 1, i + 1);
     }
 
+    return OK;
+}
+
+static err_code_t connect_next(FILE* dot_file, my_list list)
+{
     DOT_("edge[weight=1, color=\"#FF0000\"];\n");
     for (size_t i = 0; i < list.capacity - 1; i++)
     {
@@ -110,9 +145,11 @@ err_code_t make_graph(char *filename, my_list list)
         }
     }
 
-    DOT_("free_var[shape=record; label=\"free = %zd\"];", FREE);
-    DOT_("free_var->g%d [color = blue];", FREE);
+    return OK;
+}
 
+static err_code_t connect_prev(FILE* dot_file, my_list list)
+{
     DOT_("edge[weight=1, color=\"#00FF00\", constraint = false];\n");
     for (size_t i = 0; i < list.capacity - 1; i++)
     {
@@ -123,8 +160,28 @@ err_code_t make_graph(char *filename, my_list list)
         }
     }
 
+    return OK;
+}
+
+static err_code_t place_free_node(FILE* dot_file, my_list list)
+{
+    DOT_("free_var[shape=record; label=\"free = %zd\"];", FREE);
+    DOT_("free_var->g%d [color = blue];", FREE);
+
+    return OK;
+}
+
+static err_code_t init_graph(FILE* dot_file, my_list list)
+{
+    DOT_("digraph{\n");
+    DOT_("rankdir = LR;\n splines=true;\n");
+
+    return OK;
+}
+
+static err_code_t end_graph(FILE* dot_file, my_list list)
+{
     DOT_("}\n");
-    fclose(dot_file);
 
     return OK;
 }
