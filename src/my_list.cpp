@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "my_log.h"
+#define LIST_IS_PTR
+#include "list_dsl.h"
 
 #define CHECK_LIST; if(err_code_t err_num = list_verificator(*list))     \
     {                                                                   \
@@ -189,3 +191,6 @@ labels_t get_tail(my_list *list)
 
     return NEXT[0];
 }
+
+#include "undef_dsl.h"
+

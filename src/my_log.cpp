@@ -2,7 +2,7 @@
 #include "utils.h"
 #include <assert.h>
 
-FILE* LOG_FILE;
+FILE* LOG_FILE = NULL;
 
 err_code_t enable_logging(const char *filename)
 {
@@ -15,7 +15,10 @@ err_code_t enable_logging(const char *filename)
 
 err_code_t disable_logging()
 {
-    fclose(LOG_FILE); // TODO: check for double close
+    if (LOG_FILE != NULL)
+    {
+        fclose(LOG_FILE); // TODO: check for double close
+    }
 
     return OK;
 }

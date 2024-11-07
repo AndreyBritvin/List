@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include "utils.h"
 #include <stdio.h>
-#include "list_dsl.h"
 
 const int  FREE_POS = -1;
 const int EMPTY_POS =  0;
@@ -37,6 +36,6 @@ err_code_t list_verificator(my_list list);
 
 err_code_t list_dump(my_list list);
 size_t generate_graph(my_list *list);
-err_code_t make_graph(char *filename, my_list *list);
+err_code_t make_graph(char *filename, my_list list);
 
 #endif // MY_LIST_H_
