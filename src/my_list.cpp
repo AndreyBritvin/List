@@ -8,6 +8,8 @@
 #define LIST_IS_PTR
 #include "list_dsl.h"
 
+#define LIST_DUMP(list); list_dump(list, __func__, __FILE__, __LINE__);
+
 #define CHECK_LIST; if(err_code_t err_num = list_verificator(*list))     \
     {                                                                   \
         fprintf(stderr, "Error %d occured, check enum :(\n", err_num);  \
@@ -92,7 +94,7 @@ err_code_t list_insert(my_list *list, size_t pos, list_val_t value)
 
     LOG("<pre>------------------------------------------------------------------"
         "\nList before insert:\n");
-    list_dump(*list);
+    LIST_DUMP(*list);
 
     labels_t free_buffer = -NEXT[FREE]; // TODO: DSL
 
@@ -108,7 +110,7 @@ err_code_t list_insert(my_list *list, size_t pos, list_val_t value)
     list->size += 1;
 
     LOG("\nList AFTER insert:\n");
-    list_dump(*list);
+    LIST_DUMP(*list);
     LOG("\nEnd list dump\n------------------------------------------------------------------"
         "</pre>");
 
@@ -128,7 +130,7 @@ err_code_t list_remove(my_list *list, size_t pos)
 
     LOG("<pre>"
         "List before delete:\n");
-    list_dump(*list);
+    LIST_DUMP(*list);
 
     DATA[pos]       = EMPTY_POS;
     NEXT[PREV[pos]] = NEXT[pos];
@@ -140,7 +142,7 @@ err_code_t list_remove(my_list *list, size_t pos)
     list->size -= 1;
 
     LOG("\nList AFTER delete:\n");
-    list_dump(*list);
+    LIST_DUMP(*list);
     LOG("\nEnd list dump\n------------------------------------------------------------------"
         "</pre>");
     return OK;
@@ -192,5 +194,38 @@ labels_t get_tail(my_list *list)
     return NEXT[0];
 }
 
+err_code_t list_linearize_very_slow(my_list *list)
+{
+    assert(list != NULL);
+
+    CHECK_LIST;
+
+    for (size_t i = 1; i < list->capacity; i++)
+    {
+        for (size_t j = i; j < list->capacity - 1; j++)
+        {
+            if (abs(NEXT[j]) > abs(NEXT[j + 1]))
+            {
+                NEXT[PREV[j + 1]] = NEXT[j + 1];
+                labels_t buff_next_1 = NEXT[j + 1];
+                NEXT[j + 1] = PREV[j];
+                PREV[NEXT[j]] = PREV[j];
+                PREV[j] = buff_next_1;
+                labels_t   buff_prev = PREV[j];
+                labels_t   buff_next = NEXT[j];
+                list_val_t buff_data = DATA[j];
+                NEXT[j] = NEXT[j + 1];
+                PREV[j] = PREV[j + 1];
+                DATA[j] = DATA[j + 1];
+                NEXT[j + 1] = buff_next;
+                PREV[j + 1] = buff_prev;
+                DATA[j + 1] = buff_data;
+    LIST_DUMP(*list);
+            }
+        }
+    }
+
+    return OK;
+}
 #include "undef_dsl.h"
 

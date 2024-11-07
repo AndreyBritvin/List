@@ -16,10 +16,11 @@ static err_code_t init_graph        (FILE* dot_file, my_list list);
 static err_code_t end_graph         (FILE* dot_file, my_list list);
 
 
-err_code_t list_dump(my_list list)
+err_code_t list_dump(my_list list, const char * funcname, const char * filename, const int fileline)
 {
+    LOG("\nThis dump called from function %s in file %s:%d\n\n", funcname, filename, fileline   );
 #ifndef NDEBUG
-    LOG("\nList %s created in %s:%d in function %s\n", list.name, list.filename, list.line, list.creation);
+    LOG("List %s created in %s:%d in function %s\n", list.name, list.filename, list.line, list.creation);
 #endif // NDEBUG
 
     LOG("\nList index =     ");

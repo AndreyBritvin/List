@@ -49,9 +49,11 @@ err_code_t list_remove(my_list *list, size_t pos);
 labels_t get_head(my_list *list);
 labels_t get_tail(my_list *list);
 
+err_code_t list_linearize_very_slow(my_list *list);
+
 err_code_t list_verificator(my_list list);
 
-err_code_t list_dump(my_list list);
+err_code_t list_dump(my_list list, const char * funcname, const char * filename, const int fileline);
 size_t generate_graph(my_list *list);
 err_code_t make_graph(char *filename, my_list list);
 

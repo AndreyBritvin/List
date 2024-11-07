@@ -36,7 +36,7 @@ int main()
 
     list_insert(&test_list, 2, 20);
     print_list(&test_list);
-
+    list_linearize_very_slow(&test_list);
     for (int i = 1; i < 10; i++)
     {
         list_remove(&test_list, get_head(&test_list));
