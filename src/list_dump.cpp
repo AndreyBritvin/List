@@ -18,7 +18,10 @@ static err_code_t end_graph         (FILE* dot_file, my_list list);
 
 err_code_t list_dump(my_list list)
 {
-    // printf("File ptr = %p\n", LOG_FILE);
+#ifndef NDEBUG
+    LOG("\nList %s created in %s:%d in function %s\n", list.name, list.filename, list.line, list.creation);
+#endif // NDEBUG
+
     LOG("\nList index =     ");
     for (size_t i = 0; i < list.capacity; i++)
     {

@@ -5,6 +5,17 @@
 #include "utils.h"
 #include <stdio.h>
 
+#ifndef NDEBUG
+    #define LIST_INIT(list_name) my_list list_name = {};        \
+                                 list_name.name = #list_name;   \
+                                 list_name.creation = __func__; \
+                                 list_name.line = __LINE__;     \
+                                 list_name.filename = __FILE__;
+
+#else
+    #define LIST_INIT(name) my_list name = {};
+#endif // NDEBUG
+
 const int  FREE_POS = -1;
 const int EMPTY_POS =  0;
 
@@ -19,6 +30,12 @@ struct my_list
     labels_t         free;
     size_t           size;
     size_t       capacity;
+#ifndef NDEBUG
+    const char *     name;
+    const char * creation;
+    int              line;
+    const char * filename;
+#endif // NDEBUG
 };
 
 err_code_t list_ctor(my_list *list, size_t size);

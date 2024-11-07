@@ -4,7 +4,9 @@
 
 int main()
 {
-    my_list test_list = {};
+    // my_list test_list = {};
+    LIST_INIT(test_list);
+
     list_ctor(&test_list, 10);
     enable_logging("list_dump/dump.html");
 
