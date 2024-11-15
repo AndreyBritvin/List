@@ -5,6 +5,8 @@
 #include "utils.h"
 #include <stdio.h>
 
+#define LIST_DUMP(list, pos, operation); list_dump(list, pos, operation, __func__, __FILE__, __LINE__);
+
 #ifndef NDEBUG
     #define LIST_INIT(list_name) my_list list_name = {};        \
                                  list_name.name = #list_name;   \
@@ -53,8 +55,9 @@ err_code_t list_linearize_very_slow(my_list *list);
 
 err_code_t list_verificator(my_list list);
 
-err_code_t list_dump(my_list list, const char * funcname, const char * filename, const int fileline);
-size_t generate_graph(my_list *list);
-err_code_t make_graph(char *filename, my_list list);
+err_code_t list_dump(my_list list, size_t pos, const char * op_type,
+                    const char * funcname, const char * filename, const int fileline);
+size_t generate_graph(my_list *list, size_t pos, const char * op_type);
+err_code_t make_graph(char *filename, my_list list, size_t pos, const char * op_type);
 
 #endif // MY_LIST_H_

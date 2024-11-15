@@ -36,7 +36,7 @@ int main()
 
     list_insert(&test_list, 2, 20);
     print_list(&test_list);
-    list_linearize_very_slow(&test_list);
+    // list_linearize_very_slow(&test_list);
     for (int i = 1; i < 10; i++)
     {
         list_remove(&test_list, get_head(&test_list));
@@ -51,6 +51,11 @@ int main()
     {
         list_remove(&test_list, get_head(&test_list));
     }
+
+    list_insert(&test_list, get_head(&test_list), 10);
+    list_insert(&test_list, get_head(&test_list), 20);
+    test_list.next[2] = 0;
+    LIST_DUMP(test_list, 2, "broken");
 
     list_dtor(&test_list);
     disable_logging();

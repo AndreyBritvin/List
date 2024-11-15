@@ -8,8 +8,6 @@
 #define LIST_IS_PTR
 #include "list_dsl.h"
 
-#define LIST_DUMP(list); list_dump(list, __func__, __FILE__, __LINE__);
-
 #define CHECK_LIST; if(err_code_t err_num = list_verificator(*list))     \
     {                                                                   \
         fprintf(stderr, "Error %d occured, check enum :(\n", err_num);  \
@@ -37,10 +35,10 @@ err_code_t list_ctor(my_list *list, size_t capacity)
         PREV[i] = FREE_POS;
     }
 
-    NEXT[0] = 0;
-    PREV[0] = 0;
-    FREE    = 1;
-    list->size    = 0;
+    NEXT[0]    = 0;
+    PREV[0]    = 0;
+    FREE       = 1;
+    list->size = 0;
 
     return OK;
 }
@@ -70,7 +68,7 @@ err_code_t print_list(my_list *list)
 
     CHECK_LIST;
 
-    labels_t          previous_next   = NEXT[0];
+    labels_t    previous_next   = NEXT[0];
     while (NEXT[previous_next] != NEXT[0])
     {
         printf("%d ", DATA[previous_next]);
@@ -92,9 +90,10 @@ err_code_t list_insert(my_list *list, size_t pos, list_val_t value)
         return ERROR_LIST_OVERFLOW;
     }
 
-    LOG("<pre>------------------------------------------------------------------"
-        "\nList before insert:\n");
-    LIST_DUMP(*list);
+    LOG("<pre>------------------------------------------------------------------\n"
+        "Ineserting in list at pos = %zd, value = %d\n"
+        "List before insert:\n", pos, value);
+    LIST_DUMP(*list, pos, "INSERT AFTER THIS");
 
     labels_t free_buffer = -NEXT[FREE]; // TODO: DSL
 
@@ -110,7 +109,7 @@ err_code_t list_insert(my_list *list, size_t pos, list_val_t value)
     list->size += 1;
 
     LOG("\nList AFTER insert:\n");
-    LIST_DUMP(*list);
+    LIST_DUMP(*list, NEXT[pos], "INSERTED HERE");
     LOG("\nEnd list dump\n------------------------------------------------------------------"
         "</pre>");
 
@@ -129,8 +128,9 @@ err_code_t list_remove(my_list *list, size_t pos)
     }
 
     LOG("<pre>"
-        "List before delete:\n");
-    LIST_DUMP(*list);
+        "Deleting element at pos = %zd\n"
+        "List before delete:\n", pos);
+    LIST_DUMP(*list, pos, "DELETE THIS ELEMENT");
 
     DATA[pos]       = EMPTY_POS;
     NEXT[PREV[pos]] = NEXT[pos];
@@ -142,7 +142,7 @@ err_code_t list_remove(my_list *list, size_t pos)
     list->size -= 1;
 
     LOG("\nList AFTER delete:\n");
-    LIST_DUMP(*list);
+    LIST_DUMP(*list, pos, "DELETED");
     LOG("\nEnd list dump\n------------------------------------------------------------------"
         "</pre>");
     return OK;
@@ -220,7 +220,7 @@ err_code_t list_linearize_very_slow(my_list *list)
                 NEXT[j + 1] = buff_next;
                 PREV[j + 1] = buff_prev;
                 DATA[j + 1] = buff_data;
-    LIST_DUMP(*list);
+                LIST_DUMP(*list, j, "Changed");
             }
         }
     }
